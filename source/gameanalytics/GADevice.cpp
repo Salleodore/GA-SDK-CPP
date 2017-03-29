@@ -184,7 +184,8 @@ namespace gameanalytics
 #else
 #ifdef _WIN32
 #if (_MSC_VER == 1900)
-            if (IsWindows10OrGreater())
+            //if (IsWindows10OrGreater())
+			if( IsWindowsVersionOrGreater(6, 0, 0) ) 
             {
                 return GADevice::getBuildPlatform() + " 10.0";
             }

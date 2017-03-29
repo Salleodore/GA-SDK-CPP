@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <json/json.h>
+#include <sstream>
 #if USE_UWP
 #include <locale>
 #include <codecvt>
