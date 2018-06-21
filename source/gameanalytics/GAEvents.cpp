@@ -1,6 +1,6 @@
 //
 // GA-SDK-CPP
-// Copyright 2015 GameAnalytics. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #include <vector>
@@ -278,6 +278,9 @@ namespace gameanalytics
                 eventData["value"] = value;
             }
 
+            // Add custom dimensions
+            GAEvents::addDimensionsToEvent(eventData);
+
             // Log
             logging::GALogger::i("Add DESIGN event: {eventId:" + eventId + ", value:" + std::to_string(value) + "}");
 
@@ -303,6 +306,9 @@ namespace gameanalytics
             eventData["category"] = GAEvents::CategoryError;
             eventData["severity"] = severityString;
             eventData["message"] = message;
+
+            // Add custom dimensions
+            GAEvents::addDimensionsToEvent(eventData);
 
             // Log
             logging::GALogger::i("Add ERROR event: {severity:" + severityString + ", message:" + message + "}");
@@ -357,6 +363,7 @@ namespace gameanalytics
             if (events.empty())
             {
                 logging::GALogger::i("Event queue: No events to send");
+                GAEvents::updateSessionTime();
                 return;
             }
 
@@ -448,8 +455,6 @@ namespace gameanalytics
                     store::GAStore::executeQuerySync(deleteSql);
                 }
             }
-
-            GAEvents::updateSessionTime();
         }
 
         void GAEvents::updateSessionTime()

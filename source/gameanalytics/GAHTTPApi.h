@@ -1,6 +1,6 @@
 //
 // GA-SDK-CPP
-// Copyright 2015 GameAnalytics. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #pragma once
@@ -72,6 +72,12 @@ namespace gameanalytics
                     break;
                 }
                 return{};
+            }
+
+            static void switchProtocolToHttp()
+            {
+                sharedInstance()->protocol = "http";
+                sharedInstance()->baseUrl = sharedInstance()->protocol + "://" + sharedInstance()->hostName + "/" + sharedInstance()->version;
             }
 
          private:

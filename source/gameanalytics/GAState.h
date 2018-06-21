@@ -1,6 +1,6 @@
 //
 // GA-SDK-CPP
-// Copyright 2015 GameAnalytics. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #pragma once
@@ -28,8 +28,8 @@ namespace gameanalytics
             static const std::string getIdentifier();
             static bool isInitialized();
             static Json::Int64 getSessionStart();
-            static double getSessionNum();
-            static double getTransactionNum();
+            static int getSessionNum();
+            static int getTransactionNum();
             static const std::string getSessionId();
             static const std::string getCurrentCustomDimension01();
             static const std::string getCurrentCustomDimension02();
@@ -60,7 +60,7 @@ namespace gameanalytics
             static bool hasAvailableResourceCurrency(const std::string& currency);
             static bool hasAvailableResourceItemType(const std::string& itemType);
             static void setKeys(const std::string& gameKey, const std::string& gameSecret);
-            static void endSessionAndStopQueue();
+            static void endSessionAndStopQueue(bool endThread);
             static void resumeSessionAndStartQueue();
             static Json::Value getEventAnnotations();
             static Json::Value getSdkErrorEventAnnotations();
@@ -86,10 +86,10 @@ namespace gameanalytics
 
             std::string _userId;
             std::string _identifier;
-            bool _initialized;
-            Json::Int64 _sessionStart;
-            double _sessionNum;
-            double _transactionNum;
+            bool _initialized = false;
+            Json::Int64 _sessionStart = 0;
+            int _sessionNum = 0;
+            int _transactionNum = 0;
             std::string _sessionId;
             std::string _currentCustomDimension01;
             std::string _currentCustomDimension02;
@@ -104,16 +104,16 @@ namespace gameanalytics
             std::string _build;
             std::string _facebookId;
             std::string _gender;
-            int _birthYear;
-            bool _initAuthorized;
-            Json::Int64 _clientServerTimeOffset;
+            int _birthYear = 0;
+            bool _initAuthorized = false;
+            Json::Int64 _clientServerTimeOffset = 0;
             std::string _defaultUserId;
             std::map<std::string, int> _progressionTries;
             Json::Value _sdkConfigDefault;
             Json::Value _sdkConfig;
             Json::Value _sdkConfigCached;
             static const std::string CategorySdkError;
-            bool _useManualSessionHandling;
+            bool _useManualSessionHandling = false;
         };
     }
-} 
+}

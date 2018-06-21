@@ -1,6 +1,6 @@
 //
 // GA-SDK-CPP
-// Copyright 2015 GameAnalytics. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #if defined(__linux__) || defined(__unix__) || defined(__unix) || defined(unix)
@@ -32,15 +32,6 @@
 #include <direct.h>
 #include <windows.h>
 #include <VersionHelpers.h>
-
-
-#include <intrin.h>       
-#include <iphlpapi.h>
-#include <lm.h>
-#pragma comment(lib, "netapi32.lib")
-#pragma comment(lib, "IPHLPAPI.lib")
-
-
 #if USE_WMI
 #include <comdef.h>
 #include <wbemidl.h>
@@ -78,11 +69,11 @@ namespace gameanalytics
         std::string GADevice::_gameEngineVersion;
         std::string GADevice::_connectionType = "";
 #if USE_UWP
-        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 1.3.6";
+        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 1.4.5";
 #elif USE_TIZEN
-        const std::string GADevice::_sdkWrapperVersion = "tizen 1.3.6";
+        const std::string GADevice::_sdkWrapperVersion = "tizen 1.4.5";
 #else
-        const std::string GADevice::_sdkWrapperVersion = "cpp 1.3.6";
+        const std::string GADevice::_sdkWrapperVersion = "cpp 1.4.5";
 #endif
 
         void GADevice::setSdkGameEngineVersion(const std::string& sdkGameEngineVersion)
@@ -165,58 +156,6 @@ namespace gameanalytics
             GADevice::_connectionType = "lan";
         }
 
-
-		bool __GetWinMajorMinorVersion( DWORD& major, DWORD& minor )
-		{
-			bool bRetCode = false;
-			LPBYTE pinfoRawData = 0;
-			if( NERR_Success == NetWkstaGetInfo(NULL, 100, &pinfoRawData) )
-			{
-				WKSTA_INFO_100* pworkstationInfo = (WKSTA_INFO_100*)pinfoRawData;
-				major = pworkstationInfo->wki100_ver_major;
-				minor = pworkstationInfo->wki100_ver_minor;
-				::NetApiBufferFree(pinfoRawData);
-				bRetCode = true;
-			}
-			return bRetCode;
-		}
-
-
-		bool __IsWindows10OrGreater()
-		{
-			OSVERSIONINFOEX osver;
-			
-			__pragma(warning(push))
-			__pragma(warning(disable:4996))
-			memset(&osver, 0, sizeof(osver));
-			osver.dwOSVersionInfoSize = sizeof(osver);
-			GetVersionEx((LPOSVERSIONINFO)&osver);
-			__pragma(warning(pop))
-			DWORD major = 0;
-			DWORD minor = 0;
-			if( __GetWinMajorMinorVersion(major, minor) )
-			{
-				osver.dwMajorVersion = major;
-				osver.dwMinorVersion = minor;
-			}
-			else if( osver.dwMajorVersion == 6 && osver.dwMinorVersion == 2 )
-			{
-				OSVERSIONINFOEXW osvi;
-				ULONGLONG cm = 0;
-				cm = VerSetConditionMask(cm, VER_MINORVERSION, VER_EQUAL);
-				ZeroMemory(&osvi, sizeof(osvi));
-				osvi.dwOSVersionInfoSize = sizeof(osvi);
-				osvi.dwMinorVersion = 3;
-				if (VerifyVersionInfoW(&osvi, VER_MINORVERSION, cm))
-				{
-					osver.dwMinorVersion = 3;
-				}
-			}
-
-			return osver.dwMajorVersion >= 10;
-		}
-
-
         const std::string GADevice::getOSVersionString()
         {
 #if USE_UWP
@@ -245,7 +184,7 @@ namespace gameanalytics
 #else
 #ifdef _WIN32
 #if (_MSC_VER == 1900)
-            if( __IsWindows10OrGreater() ) 
+            if (IsWindows10OrGreater())
             {
                 return GADevice::getBuildPlatform() + " 10.0";
             }

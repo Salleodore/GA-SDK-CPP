@@ -1,6 +1,6 @@
 //
 // GA-SDK-CPP
-// Copyright 2015 GameAnalytics. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #include "GAValidator.h"
@@ -381,7 +381,7 @@ namespace gameanalytics
         // validate wrapper version, build, engine version, store
         bool GAValidator::validateSdkWrapperVersion(const std::string& wrapperVersion)
         {
-            if (!utilities::GAUtilities::stringMatch(wrapperVersion, "^(unreal|corona|cocos2d|lumberyard|air|gamemaker) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
+            if (!utilities::GAUtilities::stringMatch(wrapperVersion, "^(unreal|corona|cocos2d|lumberyard|air|gamemaker|defold) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
                 return false;
             }
@@ -399,7 +399,7 @@ namespace gameanalytics
 
         bool GAValidator::validateEngineVersion(const std::string& engineVersion)
         {
-            if (!utilities::GAUtilities::stringMatch(engineVersion, "^(unreal|corona|cocos2d|lumberyard|gamemaker) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
+            if (!utilities::GAUtilities::stringMatch(engineVersion, "^(unreal|corona|cocos2d|lumberyard|gamemaker|defold) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
                 return false;
             }
@@ -620,36 +620,19 @@ namespace gameanalytics
             Json::Value validatedDict;
 
             // validate enabled field
-            if (!initResponse["enabled"].isBool())
+            if(initResponse["enabled"].isBool())
             {
-                logging::GALogger::w("validateInitRequestResponse failed - invalid type in 'enabled' field.");
-                return{};
+                validatedDict["enabled"] = initResponse.get("enabled", true).asBool();
             }
-
-            validatedDict["enabled"] = initResponse["enabled"].asBool();
-
-            // validate feature flags TODO when added (nikolaj)
-            // if (!initResponse["flags"].isNull() && initResponse["flags"].isArray()) {
-            // }
 
             // validate server_ts
             if (initResponse["server_ts"].isNumeric())
             {
-                Json::Int64 serverTsNumber = initResponse["server_ts"].asInt64();
+                Json::Int64 serverTsNumber = initResponse.get("server_ts", -1).asInt64();
                 if (serverTsNumber > 0)
                 {
                     validatedDict["server_ts"] = serverTsNumber;
                 }
-                else
-                {
-                    logging::GALogger::w("validateInitRequestResponse failed - invalid value in 'server_ts' field.");
-                    return{};
-                }
-            }
-            else
-            {
-                logging::GALogger::w("validateInitRequestResponse failed - invalid type in 'server_ts' field.");
-                return{};
             }
 
             return validatedDict;

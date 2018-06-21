@@ -7,17 +7,20 @@ import platform
 import sys
 import getopt
 import subprocess
-import re
 import config as Config
 import libs.tools as LibTools
 import shutil
 import fileinput
 
 if platform.system() == 'Windows':
-    from _winreg import *
+    from _winreg import ConnectRegistry
+    from _winreg import HKEY_LOCAL_MACHINE
+    from _winreg import OpenKey
+    from _winreg import QueryValueEx
 
 if os.name == "nt":
     __CSL = None
+
     def symlink(source, link_name):
         '''symlink(source, link_name)
            Creates a symbolic link pointing to source named link_name'''
@@ -36,20 +39,30 @@ if os.name == "nt":
 
     os.symlink = symlink
 
-def call_process(process_arguments, process_workingdir, silent=False):
+
+def call_process(process_arguments, process_workingdir, silent=False, useOutput=False):
     print('Call process ' + str(process_arguments) + ' in workingdir ' + process_workingdir)
     current_workingdir = os.getcwd()
 
     if not LibTools.folder_exists(process_workingdir):
         os.makedirs(process_workingdir)
 
+    output = ''
     os.chdir(process_workingdir)
     if silent is True:
-        subprocess.check_call(process_arguments, stdout=open(os.devnull, 'wb'))
+        if useOutput is True:
+            output = subprocess.check_output(process_arguments, stdout=open(os.devnull, 'wb')).strip()
+        else:
+            subprocess.check_call(process_arguments, stdout=open(os.devnull, 'wb'))
     else:
-        subprocess.check_call(process_arguments)
+        if useOutput is True:
+            output = subprocess.check_output(process_arguments).strip()
+        else:
+            subprocess.check_call(process_arguments)
 
     os.chdir(current_workingdir)
+
+    return output
 
 
 class Target(object):
@@ -149,21 +162,44 @@ class TargetOSX(TargetCMake):
             os.path.join(release_dir, self.target_name)
         )
 
+
 class TargetWin(TargetCMake):
     @staticmethod
-    def get_msbuild_path():
-        try:
-            aReg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
-            aKey = OpenKey(aReg, r'SOFTWARE\Microsoft\MSBuild\ToolsVersions\14.0')
-            return QueryValueEx(aKey, "MSBuildToolsPath")[0]
-        except OSError:
-            print 'msbuild path not found'
-        return ''
+    def get_msbuild_path(vs="2017"):
+        if vs == "2015":
+            try:
+                aReg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
+                aKey = OpenKey(aReg, r'SOFTWARE\Microsoft\MSBuild\ToolsVersions\14.0')
+                return QueryValueEx(aKey, "MSBuildToolsPath")[0]
+            except OSError:
+                print('msbuild path not found')
+            return ''
+        elif vs == "2017":
+            path = call_process(
+                [
+                    os.path.join(
+                        Config.BUILD_ROOT,
+                        'vswhere'
+                    ),
+                    '-requires',
+                    'Microsoft.Component.MSBuild',
+                    '-property',
+                    'installationPath'
+                ],
+                os.getcwd(),
+                useOutput=True
+            )
 
-    def build(self, silent=False):
+            path = os.path.join(path, "MSBuild", "15.0", "Bin")
+
+            return path
+        else:
+            return ''
+
+    def build(self, silent=False, vs="2017"):
         # call msbuild and compile projects in solution
         subprocess.check_call([
-            os.path.join(self.get_msbuild_path(), 'msbuild.exe'),
+            os.path.join(self.get_msbuild_path(vs), 'msbuild.exe'),
             os.path.join(self.build_dir(), 'GameAnalytics.sln'),
             '/m',  # parallel builds
             '/t:GameAnalytics',
@@ -171,7 +207,7 @@ class TargetWin(TargetCMake):
         ])
 
         subprocess.check_call([
-            os.path.join(self.get_msbuild_path(), 'msbuild.exe'),
+            os.path.join(self.get_msbuild_path(vs), 'msbuild.exe'),
             os.path.join(self.build_dir(), 'GameAnalytics.sln'),
             '/m',  # parallel builds
             '/t:GameAnalytics',
@@ -195,6 +231,7 @@ class TargetWin(TargetCMake):
             release_dir
         )
 
+
 class TargetWin10(TargetWin):
     def create_project_file(self):
         call_process(
@@ -213,6 +250,7 @@ class TargetWin10(TargetWin):
             ],
             self.build_dir()
         )
+
 
 class TargetTizen(TargetCMake):
     def create_project_file(self):
@@ -358,17 +396,18 @@ class TargetTizen(TargetCMake):
             release_file
         )
 
+
 class TargetLinux(TargetCMake):
-    def __init__(self, name, generator, architecture):
+    def __init__(self, name, generator, architecture, ccompiler, cppcompiler):
         super(TargetLinux, self).__init__(name, generator)
         self.architecture = architecture
+        self.ccompiler = ccompiler
+        self.cppcompiler = cppcompiler
 
     def create_project_file(self):
-        print 'Skip create_project_file for Linux'
-
+        print('Skip create_project_file for Linux')
 
     def build(self, silent=False):
-	    # 32-bit libs
         call_process(
             [
                 os.path.join(
@@ -379,7 +418,9 @@ class TargetLinux(TargetCMake):
                 '../../../cmake/gameanalytics/',
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=RELEASE',
-		        '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DCMAKE_C_COMPILER=' + self.ccompiler,
+                '-DCMAKE_CXX_COMPILER=' + self.cppcompiler,
                 '-G',
                 self.generator
             ],
@@ -397,7 +438,8 @@ class TargetLinux(TargetCMake):
 
         call_process(
             [
-                'make'
+                'make',
+                '-j4'
             ],
             self.build_dir(),
             silent=silent
@@ -413,7 +455,9 @@ class TargetLinux(TargetCMake):
                 '../../../cmake/gameanalytics/',
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=DEBUG',
-		        '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DCMAKE_C_COMPILER=' + self.ccompiler,
+                '-DCMAKE_CXX_COMPILER=' + self.cppcompiler,
                 '-G',
                 self.generator
             ],
@@ -431,7 +475,8 @@ class TargetLinux(TargetCMake):
 
         call_process(
             [
-                'make'
+                'make',
+                '-j4'
             ],
             self.build_dir(),
             silent=silent
@@ -460,32 +505,41 @@ class TargetLinux(TargetCMake):
             release_file
         )
 
+
 all_targets = {
     'win32-vc140-static': TargetWin('win32-vc140-static', 'Visual Studio 14'),
+    'win32-vc140-mt-static': TargetWin('win32-vc140-mt-static', 'Visual Studio 14'),
     'win32-vc120-static': TargetWin('win32-vc120-static', 'Visual Studio 12'),
+    'win32-vc120-mt-static': TargetWin('win32-vc120-mt-static', 'Visual Studio 12'),
     'win32-vc140-shared': TargetWin('win32-vc140-shared', 'Visual Studio 14'),
     'win32-vc140-shared-nowmi': TargetWin('win32-vc140-shared-nowmi', 'Visual Studio 14'),
     'win32-vc120-shared': TargetWin('win32-vc120-shared', 'Visual Studio 12'),
     'win64-vc140-static': TargetWin('win64-vc140-static', 'Visual Studio 14 Win64'),
+    'win64-vc140-mt-static': TargetWin('win64-vc140-mt-static', 'Visual Studio 14 Win64'),
     'win64-vc120-static': TargetWin('win64-vc120-static', 'Visual Studio 12 Win64'),
+    'win64-vc120-mt-static': TargetWin('win64-vc120-mt-static', 'Visual Studio 12 Win64'),
     'win64-vc140-shared': TargetWin('win64-vc140-shared', 'Visual Studio 14 Win64'),
     'win64-vc120-shared': TargetWin('win64-vc120-shared', 'Visual Studio 12 Win64'),
-    'uwp-x86-vc140-static': TargetWin10('uwp-x86-vc140-static', 'Visual Studio 14'),
-	'uwp-x64-vc140-static': TargetWin10('uwp-x64-vc140-static', 'Visual Studio 14 Win64'),
-	'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 14 ARM'),
-    'uwp-x86-vc140-shared': TargetWin10('uwp-x86-vc140-shared', 'Visual Studio 14'),
-	'uwp-x64-vc140-shared': TargetWin10('uwp-x64-vc140-shared', 'Visual Studio 14 Win64'),
-	'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 14 ARM'),
+    'uwp-x86-vc140-static': TargetWin10('uwp-x86-vc140-static', 'Visual Studio 15'),
+    'uwp-x64-vc140-static': TargetWin10('uwp-x64-vc140-static', 'Visual Studio 15 Win64'),
+    'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 15 ARM'),
+    'uwp-x86-vc140-shared': TargetWin10('uwp-x86-vc140-shared', 'Visual Studio 15'),
+    'uwp-x64-vc140-shared': TargetWin10('uwp-x64-vc140-shared', 'Visual Studio 15 Win64'),
+    'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 15 ARM'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
     'tizen-arm-static': TargetTizen('tizen-arm-static', 'arm'),
     'tizen-arm-shared': TargetTizen('tizen-arm-shared', 'arm'),
     'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
     'tizen-x86-shared': TargetTizen('tizen-x86-shared', 'x86'),
-    'linux-x86-static': TargetLinux('linux-x86-static', 'Unix Makefiles', '-m32'),
-    'linux-x86-shared': TargetLinux('linux-x86-shared', 'Unix Makefiles', '-m32'),
-    'linux-x64-static': TargetLinux('linux-x64-static', 'Unix Makefiles', '-m64'),
-    'linux-x64-shared': TargetLinux('linux-x64-shared', 'Unix Makefiles', '-m64'),
+    'linux-x86-clang-static': TargetLinux('linux-x86-clang-static', 'Unix Makefiles', '-m32', 'clang', 'clang++'),
+    'linux-x86-gcc-static': TargetLinux('linux-x86-gcc-static', 'Unix Makefiles', '-m32', 'gcc', 'g++'),
+    'linux-x86-clang-shared': TargetLinux('linux-clang-x86-shared', 'Unix Makefiles', '-m32', 'clang', 'clang++'),
+    'linux-x86-gcc-shared': TargetLinux('linux-x86-gcc-shared', 'Unix Makefiles', '-m32', 'gcc', 'g++'),
+    'linux-x64-clang-static': TargetLinux('linux-x64-clang-static', 'Unix Makefiles', '-m64', 'clang', 'clang++'),
+    'linux-x64-gcc-static': TargetLinux('linux-x64-gcc-static', 'Unix Makefiles', '-m64', 'gcc', 'g++'),
+    'linux-x64-clang-shared': TargetLinux('linux-x64-clang-shared', 'Unix Makefiles', '-m64', 'clang', 'clang++'),
+    'linux-x64-gcc-shared': TargetLinux('linux-x64-gcc-shared', 'Unix Makefiles', '-m64', 'gcc', 'g++'),
 }
 
 available_targets = {
@@ -499,83 +553,116 @@ available_targets = {
     },
     'Windows': {
         'win32-vc140-static': all_targets['win32-vc140-static'],
+        'win32-vc140-mt-static': all_targets['win32-vc140-mt-static'],
         'win32-vc120-static': all_targets['win32-vc120-static'],
+        'win32-vc120-mt-static': all_targets['win32-vc120-mt-static'],
         'win32-vc140-shared': all_targets['win32-vc140-shared'],
         'win32-vc140-shared-nowmi': all_targets['win32-vc140-shared-nowmi'],
         'win32-vc120-shared': all_targets['win32-vc120-shared'],
         'win64-vc140-static': all_targets['win64-vc140-static'],
+        'win64-vc140-mt-static': all_targets['win64-vc140-mt-static'],
         'win64-vc120-static': all_targets['win64-vc120-static'],
+        'win64-vc120-mt-static': all_targets['win64-vc120-mt-static'],
         'win64-vc140-shared': all_targets['win64-vc140-shared'],
         'win64-vc120-shared': all_targets['win64-vc120-shared'],
         'uwp-x86-vc140-static': all_targets['uwp-x86-vc140-static'],
-		'uwp-x64-vc140-static': all_targets['uwp-x64-vc140-static'],
-		'uwp-arm-vc140-static': all_targets['uwp-arm-vc140-static'],
+        'uwp-x64-vc140-static': all_targets['uwp-x64-vc140-static'],
+        'uwp-arm-vc140-static': all_targets['uwp-arm-vc140-static'],
         'uwp-x86-vc140-shared': all_targets['uwp-x86-vc140-shared'],
-		'uwp-x64-vc140-shared': all_targets['uwp-x64-vc140-shared'],
-		'uwp-arm-vc140-shared': all_targets['uwp-arm-vc140-shared'],
+        'uwp-x64-vc140-shared': all_targets['uwp-x64-vc140-shared'],
+        'uwp-arm-vc140-shared': all_targets['uwp-arm-vc140-shared'],
         'tizen-arm-static': all_targets['tizen-arm-static'],
         'tizen-arm-shared': all_targets['tizen-arm-shared'],
         'tizen-x86-static': all_targets['tizen-x86-static'],
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
     },
     'Linux': {
-        'linux-x86-static': all_targets['linux-x86-static'],
-        'linux-x86-shared': all_targets['linux-x86-shared'],
-        'linux-x64-static': all_targets['linux-x64-static'],
-        'linux-x64-shared': all_targets['linux-x64-shared'],
+        'linux-x86-clang-static': all_targets['linux-x86-clang-static'],
+        'linux-x86-gcc-static': all_targets['linux-x86-gcc-static'],
+        'linux-x86-clang-shared': all_targets['linux-x86-clang-shared'],
+        'linux-x86-gcc-shared': all_targets['linux-x86-gcc-shared'],
+        'linux-x64-clang-static': all_targets['linux-x64-clang-static'],
+        'linux-x64-gcc-static': all_targets['linux-x64-gcc-static'],
+        'linux-x64-clang-shared': all_targets['linux-x64-clang-shared'],
+        'linux-x64-gcc-shared': all_targets['linux-x64-gcc-shared'],
     }
 }[platform.system()]
+
+valid_visual_studio = [
+    '2015',
+    '2017'
+]
 
 # Sorted since we want android-wrapper to be built after android-shared (due to jni generation)
 valid_target_names = sorted(available_targets.keys())
 
 
 def print_help():
-    print 'build.py <list_of_targets>'
-    print 'valid targets:'
+    print('build.py <list_of_targets>')
+    print('valid targets:')
     for target in valid_target_names:
-        print '  ' + target
+        print('  ' + target)
+    print('valid visual studios:')
+    for vs in valid_visual_studio:
+        print('  ' + vs)
 
 
-def build(target_name, silent=False):
+def build(target_name, vs, silent=False):
     if target_name not in available_targets:
         print('target %(target_name)s not supported on this platform' % locals())
         sys.exit(1)
 
+    if vs not in valid_visual_studio:
+        print('visual studio %(vs)s not supported')
+        sys.exit(1)
+
     target = available_targets[target_name]
     target.create_project_file()
-    target.build(silent=silent)
+
+    if platform.system() == 'Windows':
+        if 'tizen' in target_name:
+            target.build(silent=silent)
+        else:
+            target.build(silent=silent, vs=vs)
+    else:
+        target.build(silent=silent)
 
 
-def build_targets(target_names, silent=False):
+def build_targets(target_names, silent=False, vs="2017", skip_tizen=False):
 
     for target_name in target_names:
-        print ""
-        print "-----------------------------------------"
-        print ""
-        print "    BUILDING TARGET: " + target_name
-        print ""
-        print "-----------------------------------------"
-        print ""
+        if skip_tizen and 'tizen' in target_name:
+            continue
+        if skip_tizen and 'clang' in target_name:
+            continue
+        print("")
+        print("-----------------------------------------")
+        print("")
+        print("    BUILDING TARGET: " + target_name)
+        print("")
+        print("-----------------------------------------")
+        print("")
 
-        build(target_name, silent=silent)
+        build(target_name, vs, silent=silent)
 
 
 # @timing - benchmarking build
 def main(argv, silent=False):
-    print "-----------------------------------------"
-    print "    BUILDING"
-    print "-----------------------------------------"
-    print "Build arguments..."
-    print argv
+    print("-----------------------------------------")
+    print("    BUILDING")
+    print("-----------------------------------------")
+    print("Build arguments...")
+    print(argv)
 
     try:
-        opts, args = getopt.getopt(argv, "t:h", ["target=", "help"])
+        opts, args = getopt.getopt(argv, "t:v:nh", ["target=", "vs=", "notizen", "help"])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
 
     build_target_name = None
+    visual_studio = "2017"
+    skip_tizen = False
 
     for opt, arg in opts:
         if opt in ('-h', '--help'):
@@ -585,15 +672,25 @@ def main(argv, silent=False):
             if arg in valid_target_names:
                 build_target_name = arg
             else:
-                print "Target: " + arg + " is not part of allowed targets."
+                print("Target: " + arg + " is not part of allowed targets.")
+                print_help()
+                sys.exit(2)
+        elif opt in ('-n', '--notizen'):
+            skip_tizen = True
+        elif opt in ('-v', '--vs'):
+            if arg in valid_visual_studio:
+                visual_studio = arg
+            else:
+                print("Visual Studio version: " + arg + " is not part of allowed visual studio versions.")
                 print_help()
                 sys.exit(2)
 
     if build_target_name:
-        build_targets([arg], silent=silent)
+        build_targets([build_target_name], silent=silent, vs=visual_studio, skip_tizen=skip_tizen)
     else:
         # build all
-        build_targets(valid_target_names, silent=silent)
+        build_targets(valid_target_names, silent=silent, vs=visual_studio, skip_tizen=skip_tizen)
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])

@@ -1,14 +1,14 @@
 //
 // GA-SDK-CPP
-// Copyright 2015 GameAnalytics. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #pragma once
 
+#include <sstream>
 #include <vector>
 #include <string>
 #include <json/json.h>
-#include <sstream>
 #if USE_UWP
 #include <locale>
 #include <codecvt>

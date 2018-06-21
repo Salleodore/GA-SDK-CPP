@@ -1,6 +1,6 @@
 //
 // GA-SDK-CPP
-// Copyright 2015 GameAnalytics. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #include "GAState.h"
@@ -45,12 +45,12 @@ namespace gameanalytics
             return GAState::sharedInstance()->_sessionStart;
         }
 
-        double GAState::getSessionNum()
+        int GAState::getSessionNum()
         {
             return GAState::sharedInstance()->_sessionNum;
         }
 
-        double GAState::getTransactionNum()
+        int GAState::getTransactionNum()
         {
             return GAState::sharedInstance()->_transactionNum;
         }
@@ -173,7 +173,7 @@ namespace gameanalytics
         {
             Json::Value currentSdkConfig = GAState::getSdkConfig();
 
-            if (currentSdkConfig.isObject() && currentSdkConfig.get("enabled", false).isBool() && currentSdkConfig.get("enabled", false).asBool() == false)
+            if (currentSdkConfig.isObject() && currentSdkConfig["enabled"].isBool() && currentSdkConfig.get("enabled", true).asBool() == false)
             {
                 return false;
             }
@@ -380,7 +380,7 @@ namespace gameanalytics
             events::GAEvents::ensureEventQueueIsRunning();
         }
 
-        void GAState::endSessionAndStopQueue()
+        void GAState::endSessionAndStopQueue(bool endThread)
         {
             if(GAState::isInitialized())
             {
@@ -390,6 +390,11 @@ namespace gameanalytics
                 {
                     events::GAEvents::addSessionEndEvent();
                     GAState::sharedInstance()->_sessionStart = 0;
+                }
+
+                if(endThread)
+                {
+                    threading::GAThreading::endThread();
                 }
             }
         }
@@ -583,9 +588,9 @@ namespace gameanalytics
                 instance->setDefaultUserId(defaultId);
             }
 
-            instance->_sessionNum = utilities::GAUtilities::parseString<double>(state_dict.get("session_num", "0.0").asString());
+            instance->_sessionNum = utilities::GAUtilities::parseString<int>(state_dict.get("session_num", "0").asString());
 
-            instance->_transactionNum = utilities::GAUtilities::parseString<double>(state_dict.get("transaction_num", "0.0").asString());
+            instance->_transactionNum = utilities::GAUtilities::parseString<int>(state_dict.get("transaction_num", "0").asString());
 
             // restore cross session user values
             if (!instance->_facebookId.empty())
