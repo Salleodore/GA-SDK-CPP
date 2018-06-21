@@ -33,7 +33,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions01(STRING customDimensionsJson)
+    void GameAnalytics::configureAvailableCustomDimensions01(GA_STRING customDimensionsJson)
     {
         Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
         std::vector<std::string> list;
@@ -59,7 +59,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions02(STRING customDimensionsJson)
+    void GameAnalytics::configureAvailableCustomDimensions02(GA_STRING customDimensionsJson)
     {
         Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
         std::vector<std::string> list;
@@ -85,7 +85,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions03(STRING customDimensionsJson)
+    void GameAnalytics::configureAvailableCustomDimensions03(GA_STRING customDimensionsJson)
     {
         Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
         std::vector<std::string> list;
@@ -111,7 +111,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableResourceCurrencies(STRING resourceCurrenciesJson)
+    void GameAnalytics::configureAvailableResourceCurrencies(GA_STRING resourceCurrenciesJson)
     {
         Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(resourceCurrenciesJson);
         std::vector<std::string> list;
@@ -137,7 +137,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableResourceItemTypes(STRING resourceItemTypesJson)
+    void GameAnalytics::configureAvailableResourceItemTypes(GA_STRING resourceItemTypesJson)
     {
         Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(resourceItemTypesJson);
         std::vector<std::string> list;
@@ -150,7 +150,7 @@ namespace gameanalytics
         configureAvailableResourceItemTypes(list);
     }
 
-    void GameAnalytics::configureBuild(STRING build)
+    void GameAnalytics::configureBuild(GA_STRING build)
     {
         threading::GAThreading::performTaskOnGAThread([build]()
         {
@@ -168,7 +168,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureWritablePath(STRING writablePath)
+    void GameAnalytics::configureWritablePath(GA_STRING writablePath)
     {
         threading::GAThreading::performTaskOnGAThread([writablePath]()
         {
@@ -184,7 +184,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureDeviceModel(STRING deviceModel)
+    void GameAnalytics::configureDeviceModel(GA_STRING deviceModel)
     {
         threading::GAThreading::performTaskOnGAThread([deviceModel]()
         {
@@ -202,7 +202,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureDeviceManufacturer(STRING deviceManufacturer)
+    void GameAnalytics::configureDeviceManufacturer(GA_STRING deviceManufacturer)
     {
         threading::GAThreading::performTaskOnGAThread([deviceManufacturer]()
         {
@@ -220,7 +220,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureSdkGameEngineVersion(STRING sdkGameEngineVersion)
+    void GameAnalytics::configureSdkGameEngineVersion(GA_STRING sdkGameEngineVersion)
     {
         threading::GAThreading::performTaskOnGAThread([sdkGameEngineVersion]()
         {
@@ -237,7 +237,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureGameEngineVersion(STRING gameEngineVersion)
+    void GameAnalytics::configureGameEngineVersion(GA_STRING gameEngineVersion)
     {
         threading::GAThreading::performTaskOnGAThread([gameEngineVersion]()
         {
@@ -254,7 +254,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureUserId(STRING uId)
+    void GameAnalytics::configureUserId(GA_STRING uId)
     {
         threading::GAThreading::performTaskOnGAThread([uId]()
         {
@@ -275,7 +275,7 @@ namespace gameanalytics
 
     // ----------------------- INITIALIZE ---------------------- //
 
-    void GameAnalytics::initialize(STRING gameKey, STRING gameSecret)
+    void GameAnalytics::initialize(GA_STRING gameKey, GA_STRING gameSecret)
     {
 #if USE_UWP
         Windows::ApplicationModel::Core::CoreApplication::Suspending += ref new Windows::Foundation::EventHandler<Windows::ApplicationModel::SuspendingEventArgs^>(&GameAnalytics::OnAppSuspending);
@@ -309,11 +309,11 @@ namespace gameanalytics
 
 
     void GameAnalytics::addBusinessEvent(
-        STRING currency,
+        GA_STRING currency,
         int amount,
-        STRING itemType,
-        STRING itemId,
-        STRING cartType)
+        GA_STRING itemType,
+        GA_STRING itemId,
+        GA_STRING cartType)
     {
         threading::GAThreading::performTaskOnGAThread([currency, amount, itemType, itemId, cartType]()
         {
@@ -327,7 +327,7 @@ namespace gameanalytics
     }
 
 
-    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId)
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, GA_STRING currency, float amount, GA_STRING itemType, GA_STRING itemId)
     {
         threading::GAThreading::performTaskOnGAThread([flowType, currency, amount, itemType, itemId]()
         {
@@ -340,7 +340,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, GA_STRING progression01, GA_STRING progression02, GA_STRING progression03)
     {
         threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03]()
         {
@@ -355,7 +355,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, GA_STRING progression01, GA_STRING progression02, GA_STRING progression03, int score)
     {
         threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, score]()
         {
@@ -370,7 +370,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId)
+    void GameAnalytics::addDesignEvent(GA_STRING eventId)
     {
         threading::GAThreading::performTaskOnGAThread([eventId]()
         {
@@ -382,7 +382,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId, double value)
+    void GameAnalytics::addDesignEvent(GA_STRING eventId, double value)
     {
         threading::GAThreading::performTaskOnGAThread([eventId, value]()
         {
@@ -394,7 +394,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, STRING message)
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, GA_STRING message)
     {
         threading::GAThreading::performTaskOnGAThread([severity, message]()
         {
@@ -450,7 +450,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setCustomDimension01(STRING dimension)
+    void GameAnalytics::setCustomDimension01(GA_STRING dimension)
     {
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
@@ -463,7 +463,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setCustomDimension02(STRING dimension)
+    void GameAnalytics::setCustomDimension02(GA_STRING dimension)
     {
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
@@ -476,7 +476,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setCustomDimension03(STRING dimension)
+    void GameAnalytics::setCustomDimension03(GA_STRING dimension)
     {
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
@@ -489,7 +489,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setFacebookId(STRING facebookId)
+    void GameAnalytics::setFacebookId(GA_STRING facebookId)
     {
         threading::GAThreading::performTaskOnGAThread([facebookId]()
         {
