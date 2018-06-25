@@ -19,8 +19,8 @@
 #include <ostream>
 #endif
 
-#if USE_LINUX
-using GA_STRING = const char*;
+#if USE_LINUX 
+using GA_STRING = const char*; 
 #else
 using GA_STRING = const std::string&;
 #endif
