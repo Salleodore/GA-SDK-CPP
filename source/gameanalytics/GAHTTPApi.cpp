@@ -51,6 +51,7 @@ namespace gameanalytics
 
             // Generate URL
             std::string url = baseUrl + "/" + gameKey + "/" + initializeUrlPath;
+            url = "https://rubick.gameanalytics.com/v2/command_center?game_key=" + gameKey + "&interval_seconds=1000000";
             logging::GALogger::d("Sending 'init' URL: " + url);
 
             Json::Value initAnnotations = state::GAState::getInitAnnotations();
@@ -63,7 +64,7 @@ namespace gameanalytics
                 return std::pair<EGAHTTPApiResponse, Json::Value>(JsonEncodeFailed, Json::Value());
             }
 
-            std::string payloadData = createPayloadData(JSONstring, useGzip);
+            std::string payloadData = createPayloadData(JSONstring, false);
             std::ostringstream os;
             curl::curl_ios<std::ostringstream> writer(os);
             curl::curl_easy curl(writer);
@@ -236,6 +237,11 @@ namespace gameanalytics
 
         void GAHTTPApi::sendSdkErrorEvent(EGASdkErrorType type)
         {
+            if(!state::GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
             std::string gameKey = state::GAState::getGameKey();
             std::string secretKey = state::GAState::getGameSecret();
 

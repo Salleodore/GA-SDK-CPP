@@ -28,6 +28,29 @@ Dependencies
 
 Changelog
 ---------
+**2.1.0**
+* added automatic error reporting
+* added enable/disable event submission
+
+**2.0.4**
+* fixed business event validation
+
+**2.0.3**
+* fixed shutdown issues
+
+**2.0.2**
+* fixed thread hanging on shutdown
+
+**2.0.1**
+* added command center functions to extern interface
+
+**2.0.0**
+* added command center functionality
+
+**1.4.6**
+* fixes for occasional crashes when shutting down
+* fixes crashes on UWP
+
 **1.4.5**
 * fixes for Linux interface
 

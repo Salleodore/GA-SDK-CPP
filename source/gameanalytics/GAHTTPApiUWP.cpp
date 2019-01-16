@@ -81,6 +81,7 @@ namespace gameanalytics
 
             // Generate URL
             std::string url = baseUrl + "/" + gameKey + "/" + initializeUrlPath;
+            url = "https://rubick.gameanalytics.com/v2/command_center?game_key=" + gameKey + "&interval_seconds=1000000";
             logging::GALogger::d("Sending 'init' URL: " + url);
 
             Json::Value initAnnotations = state::GAState::getInitAnnotations();
@@ -361,7 +362,7 @@ namespace gameanalytics
 
             return create_task([=]()
             {
-                unsigned int size = data.size();
+                size_t size = data.size();
                 Buffer^ buffer = ref new Buffer(size);
                 buffer->Length = size;
 

@@ -8,6 +8,8 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <mutex>
+#include <functional>
 #include "Foundation/GASingleton.h"
 #include <json/json.h>
 #include "GameAnalytics.h"
@@ -69,7 +71,17 @@ namespace gameanalytics
             static Json::Int64 getClientTsAdjusted();
             static void setManualSessionHandling(bool flag);
             static bool useManualSessionHandling();
+            static void setEnableErrorReporting(bool flag);
+            static bool useErrorReporting();
+            static void setEnabledEventSubmission(bool flag);
+            static bool isEventSubmissionEnabled();
             static bool sessionIsStarted();
+            static const Json::Value validateAndCleanCustomFields(const Json::Value& fields);
+            static std::string getConfigurationStringValue(const std::string& key, const std::string& defaultValue);
+            static bool isCommandCenterReady();
+            static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+            static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+            static std::string getConfigurationsContentAsString();
 
          private:
             static void setDefaultUserId(const std::string& id);
@@ -83,6 +95,7 @@ namespace gameanalytics
             static const std::string getGender();
             static int getBirthYear();
             static Json::Int64 calculateServerTimeOffset(Json::Int64 serverTs);
+            static void populateConfigurations(Json::Value sdkConfig);
 
             std::string _userId;
             std::string _identifier;
@@ -114,6 +127,12 @@ namespace gameanalytics
             Json::Value _sdkConfigCached;
             static const std::string CategorySdkError;
             bool _useManualSessionHandling = false;
+            bool _enableErrorReporting = true;
+            bool _enableEventSubmission = true;
+            Json::Value _configurations;
+            bool _commandCenterIsReady;
+            std::vector<std::shared_ptr<ICommandCenterListener>> _commandCenterListeners;
+            std::mutex _mtx;
         };
     }
 }
