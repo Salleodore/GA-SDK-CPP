@@ -43,7 +43,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions01(STRING customDimensionsJson)
+    void GameAnalytics::configureAvailableCustomDimensions01(GA_STRING customDimensionsJson)
     {
         Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
         std::vector<std::string> list;
@@ -74,7 +74,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions02(STRING customDimensionsJson)
+    void GameAnalytics::configureAvailableCustomDimensions02(GA_STRING customDimensionsJson)
     {
         Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
         std::vector<std::string> list;
@@ -105,7 +105,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions03(STRING customDimensionsJson)
+    void GameAnalytics::configureAvailableCustomDimensions03(GA_STRING customDimensionsJson)
     {
         Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
         std::vector<std::string> list;
@@ -136,7 +136,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableResourceCurrencies(STRING resourceCurrenciesJson)
+    void GameAnalytics::configureAvailableResourceCurrencies(GA_STRING resourceCurrenciesJson)
     {
         Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(resourceCurrenciesJson);
         std::vector<std::string> list;
@@ -167,7 +167,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableResourceItemTypes(STRING resourceItemTypesJson)
+    void GameAnalytics::configureAvailableResourceItemTypes(GA_STRING resourceItemTypesJson)
     {
         Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(resourceItemTypesJson);
         std::vector<std::string> list;
@@ -180,7 +180,7 @@ namespace gameanalytics
         configureAvailableResourceItemTypes(list);
     }
 
-    void GameAnalytics::configureBuild(STRING build_)
+    void GameAnalytics::configureBuild(GA_STRING build_)
     {
         if(_endThread)
         {
@@ -204,7 +204,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureWritablePath(STRING writablePath_)
+    void GameAnalytics::configureWritablePath(GA_STRING writablePath_)
     {
         if(_endThread)
         {
@@ -226,7 +226,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureDeviceModel(STRING deviceModel_)
+    void GameAnalytics::configureDeviceModel(GA_STRING deviceModel_)
     {
         if(_endThread)
         {
@@ -250,7 +250,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureDeviceManufacturer(STRING deviceManufacturer_)
+    void GameAnalytics::configureDeviceManufacturer(GA_STRING deviceManufacturer_)
     {
         if(_endThread)
         {
@@ -274,7 +274,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureSdkGameEngineVersion(STRING sdkGameEngineVersion_)
+    void GameAnalytics::configureSdkGameEngineVersion(GA_STRING sdkGameEngineVersion_)
     {
         if(_endThread)
         {
@@ -297,7 +297,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureGameEngineVersion(STRING gameEngineVersion_)
+    void GameAnalytics::configureGameEngineVersion(GA_STRING gameEngineVersion_)
     {
         if(_endThread)
         {
@@ -320,7 +320,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureUserId(STRING uId_)
+    void GameAnalytics::configureUserId(GA_STRING uId_)
     {
         if(_endThread)
         {
@@ -347,7 +347,7 @@ namespace gameanalytics
 
     // ----------------------- INITIALIZE ---------------------- //
 
-    void GameAnalytics::initialize(STRING gameKey_, STRING gameSecret_)
+    void GameAnalytics::initialize(GA_STRING gameKey_, GA_STRING gameSecret_)
     {
         if(_endThread)
         {
@@ -392,22 +392,22 @@ namespace gameanalytics
 
 
     void GameAnalytics::addBusinessEvent(
-        STRING currency,
+        GA_STRING currency,
         int amount,
-        STRING itemType,
-        STRING itemId,
-        STRING cartType)
+        GA_STRING itemType,
+        GA_STRING itemId,
+        GA_STRING cartType)
     {
         addBusinessEvent(currency, amount, itemType, itemId, cartType, "");
     }
 
     void GameAnalytics::addBusinessEvent(
-        STRING currency_,
+        GA_STRING currency_,
         int amount,
-        STRING itemType_,
-        STRING itemId_,
-        STRING cartType_,
-        STRING fields_)
+        GA_STRING itemType_,
+        GA_STRING itemId_,
+        GA_STRING cartType_,
+        GA_STRING fields_)
     {
         if(_endThread)
         {
@@ -431,12 +431,12 @@ namespace gameanalytics
     }
 
 
-    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId)
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, GA_STRING currency, float amount, GA_STRING itemType, GA_STRING itemId)
     {
         addResourceEvent(flowType, currency, amount, itemType, itemId, "");
     }
 
-    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, STRING currency_, float amount, STRING itemType_, STRING itemId_, STRING fields_)
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, GA_STRING currency_, float amount, GA_STRING itemType_, GA_STRING itemId_, GA_STRING fields_)
     {
         if(_endThread)
         {
@@ -458,12 +458,12 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, GA_STRING progression01, GA_STRING progression02, GA_STRING progression03)
     {
         addProgressionEvent(progressionStatus, progression01, progression02, progression03, "");
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01_, STRING progression02_, STRING progression03_, STRING fields_)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, GA_STRING progression01_, GA_STRING progression02_, GA_STRING progression03_, GA_STRING fields_)
     {
         if(_endThread)
         {
@@ -486,12 +486,12 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, GA_STRING progression01, GA_STRING progression02, GA_STRING progression03, int score)
     {
         addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, "");
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01_, STRING progression02_, STRING progression03_, int score, STRING fields_)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, GA_STRING progression01_, GA_STRING progression02_, GA_STRING progression03_, int score, GA_STRING fields_)
     {
         if(_endThread)
         {
@@ -514,12 +514,12 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId)
+    void GameAnalytics::addDesignEvent(GA_STRING eventId)
     {
         addDesignEvent(eventId, "");
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId_, STRING fields_)
+    void GameAnalytics::addDesignEvent(GA_STRING eventId_, GA_STRING fields_)
     {
         if(_endThread)
         {
@@ -538,12 +538,12 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId, double value)
+    void GameAnalytics::addDesignEvent(GA_STRING eventId, double value)
     {
         addDesignEvent(eventId, value, "");
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId_, double value, STRING fields_)
+    void GameAnalytics::addDesignEvent(GA_STRING eventId_, double value, GA_STRING fields_)
     {
         if(_endThread)
         {
@@ -562,12 +562,12 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, STRING message)
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, GA_STRING message)
     {
         addErrorEvent(severity, message, "");
     }
 
-    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, STRING message_, STRING fields_)
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, GA_STRING message_, GA_STRING fields_)
     {
         if(_endThread)
         {
@@ -680,7 +680,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setCustomDimension01(STRING dimension_)
+    void GameAnalytics::setCustomDimension01(GA_STRING dimension_)
     {
         if(_endThread)
         {
@@ -699,7 +699,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setCustomDimension02(STRING dimension_)
+    void GameAnalytics::setCustomDimension02(GA_STRING dimension_)
     {
         if(_endThread)
         {
@@ -718,7 +718,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setCustomDimension03(STRING dimension_)
+    void GameAnalytics::setCustomDimension03(GA_STRING dimension_)
     {
         if(_endThread)
         {
@@ -737,7 +737,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setFacebookId(STRING facebookId_)
+    void GameAnalytics::setFacebookId(GA_STRING facebookId_)
     {
         if(_endThread)
         {
@@ -786,12 +786,12 @@ namespace gameanalytics
         });
     }
 
-    RETURN_STRING GameAnalytics::getCommandCenterValueAsString(STRING key)
+    RETURN_GA_STRING GameAnalytics::getCommandCenterValueAsString(GA_STRING key)
     {
         return getCommandCenterValueAsString(key, "");
     }
 
-    RETURN_STRING GameAnalytics::getCommandCenterValueAsString(STRING key, STRING defaultValue)
+    RETURN_GA_STRING GameAnalytics::getCommandCenterValueAsString(GA_STRING key, GA_STRING defaultValue)
     {
 #if USE_LINUX
         return state::GAState::getConfigurationStringValue(key, defaultValue).c_str();
@@ -815,7 +815,7 @@ namespace gameanalytics
         state::GAState::removeCommandCenterListener(listener);
     }
 
-    RETURN_STRING GameAnalytics::getConfigurationsContentAsString()
+    RETURN_GA_STRING GameAnalytics::getConfigurationsContentAsString()
     {
 #if USE_LINUX
         return state::GAState::getConfigurationsContentAsString().c_str();
