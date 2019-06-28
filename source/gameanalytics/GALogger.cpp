@@ -195,7 +195,7 @@ namespace gameanalytics
         {
             GALogger *ga = GALogger::sharedInstance();
 
-            if (!ga->debugEnabled) {
+            if (!ga || !ga->debugEnabled) {
                 // No logging of debug unless in full debug logging mode
                 return;
             }
