@@ -44,7 +44,7 @@ namespace gameanalytics
                 events::GAEvents::processEvents("error", false);
             }
 
-            std::_Exit( EXIT_FAILURE );
+            std::exit( EXIT_FAILURE );
         }
 
         void GAUncaughtExceptionHandler::setupUncaughtSignals()
@@ -125,7 +125,7 @@ namespace gameanalytics
             sigemptyset(&newact.sa_mask);
             newact.sa_handler= SIG_DFL;
 
-            std::_Exit( EXIT_FAILURE );
+            std::exit( EXIT_FAILURE );
         }
 
         const std::string GAUncaughtExceptionHandler::format(const std::string& format, ...)
@@ -177,7 +177,7 @@ namespace gameanalytics
             }
             else
             {
-                std::_Exit( EXIT_FAILURE );
+                std::exit( EXIT_FAILURE );
             }
         }
 
